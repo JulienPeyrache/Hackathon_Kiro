@@ -111,7 +111,7 @@ n_operators = 10
 n_jobs = 10
 n_tasks_per_job = [i for i in range(10)]
 p={}
-d={}
+r={}
 
 ### Decision variables
 # beginning of tasks of jobs
@@ -139,4 +139,5 @@ for j in range(1,n_jobs):
     m.addConstr(B[(j,k)] >= B[(j,k-1)]+p[(k,j)])
 
 for j in range(1,n_jobs+1):
-  m.addConstr(B[(j,2)] >= d[j])
+  m.addConstr(B[(j,2)] >= r[j])
+
