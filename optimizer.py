@@ -1,6 +1,6 @@
 from functools import reduce
 import re
-
+import json
 from gurobipy import *
 import pprint
 
@@ -110,25 +110,25 @@ def parser(filename):
     except TypeError:
         print(None)
 
-
-json = parser("sujet/tiny.json")
+f="sujet/medium.json"
+json_data = parser(f)
 
 mod = Model("trs0")
 
 # Très grand nombre
 inf = 1000000000
 
-beta = json["parameters"]["costs"]["tardiness"]
-alpha = json["parameters"]["costs"]["unit_penalty"]
-n_machines = json["parameters"]["size"]["nb_machines"]  ##Nombre de machines
-n_operators = json["parameters"]["size"]["nb_operators"]  ##Nombre d'opérateurs
-n_jobs = json["parameters"]["size"]["nb_jobs"]  ##Nombre de jobs
-job_names = [json["jobs"][i]["job"] for i in range(n_jobs)]  ##Nom effectif des jobs
+beta = json_data["parameters"]["costs"]["tardiness"]
+alpha = json_data["parameters"]["costs"]["unit_penalty"]
+n_machines = json_data["parameters"]["size"]["nb_machines"]  ##Nombre de machines
+n_operators = json_data["parameters"]["size"]["nb_operators"]  ##Nombre d'opérateurs
+n_jobs = json_data["parameters"]["size"]["nb_jobs"]  ##Nombre de jobs
+job_names = [json_data["jobs"][i]["job"] for i in range(n_jobs)]  ##Nom effectif des jobs
 
 
 tasks_per_job = {}  ##Dictio des tâches par job (clé = nom du job)
 for i in range(n_jobs):
-    tasks_per_job[json["jobs"][i]["job"]] = json["jobs"][i][
+    tasks_per_job[json_data["jobs"][i]["job"]] = json_data["jobs"][i][
         "sequence"
     ]  ##Nombre de tâches par job
 
@@ -136,11 +136,11 @@ w = {}  ##Dictio des poids des job (clé = nom du job)
 d = {}  ##Dictio des durées des jobs (clé = nom du job)
 r = {}  ##Dictio des ressources des jobs (clé = nom du job)
 for i in range(n_jobs):
-    w[json["jobs"][i]["job"]] = json["jobs"][i]["weight"]  ##Poids des jobs
-    d[json["jobs"][i]["job"]] = json["jobs"][i][
+    w[json_data["jobs"][i]["job"]] = json_data["jobs"][i]["weight"]  ##Poids des jobs
+    d[json_data["jobs"][i]["job"]] = json_data["jobs"][i][
         "due_date"
     ]  ##Date limite de fin des jobs
-    r[json["jobs"][i]["job"]] = json["jobs"][i][
+    r[json_data["jobs"][i]["job"]] = json_data["jobs"][i][
         "release_date"
     ]  ##Date de début des jobs
 
@@ -152,13 +152,13 @@ op_task_machine = (
 )  ##Dictio des opérateurs par tâche et par machine (clé = nom de la tâche puis de la machine)
 for i in tasks_per_job:
     for j in tasks_per_job[i]:
-        p_tasks[j] = json["tasks"][j - 1]["processing_time"]
+        p_tasks[j] = json_data["tasks"][j - 1]["processing_time"]
         m_tasks[j] = [
-            json["tasks"][j-1]["machines"][k-1]["machine"]
-            for k in range(len(json["tasks"][j - 1]["machines"]))
+            json_data["tasks"][j-1]["machines"][k-1]["machine"]
+            for k in range(len(json_data["tasks"][j - 1]["machines"]))
         ]
         op_task_machine[j] = {}
-        for k in json["tasks"][j - 1]["machines"]:
+        for k in json_data["tasks"][j - 1]["machines"]:
             op_task_machine[j][k["machine"]] = k["operators"]
 ### Decision variables
 
@@ -337,7 +337,27 @@ mod.setObjective(cost, GRB.MINIMIZE)
 # Optimize model
 mod.optimize()
 
-for v in mod.getVars():
-    print("%s %g" % (v.VarName, v.X))
+# for v in mod.getVars():
+#     print("%s %g" % (v.VarName, v.X))
 
 print("Obj: %g" % mod.ObjVal)
+
+def jsonify(m):
+    # m is a gurobi model
+    # returns a json_data object
+    # with the form :
+    # [{"task" : k, "start":B[k] "machine" : M[k], "operator" : O[k]} for k in tasks]
+    # print(m.getVars())
+    dico = {}
+    for j in job_names:
+        for k in tasks_per_job[j]:
+            dico[k] = {"task": k}
+            dico[k]["start"] = B[k].x
+            dico[k]["machine"] = M[k].x
+            dico[k]["operator"] = O[k].x
+    jsonStr = json.dumps([dico[k] for k in dico])
+    return jsonStr
+
+s=jsonify(mod)
+g=open(f,"w")
+g.write(s)
