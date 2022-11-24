@@ -161,6 +161,7 @@ for i in tasks_per_job:
 
 
 ### Decision variables
+
 # beginning of tasks of jobs
 B = {
     (j, k): m.addVar(vtype=GRB.INTEGER, name=f"b_{j}_{k}")
@@ -217,6 +218,9 @@ for j in range(1, n_jobs + 1):
     )
     m.addConstr(T[j] <= M * U[j])
 
+for j in range(1, n_jobs):
+    for k in range(2, tasks_per_job[j] + 1):
+        m.addConstr(B[(j, k)] >= B[(j, k - 1)] + p_tasks[(j, k)])
 
 for v in m.getVars():
     print("%s %g" % (v.VarName, v.X))
