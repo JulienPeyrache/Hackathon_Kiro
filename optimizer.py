@@ -152,12 +152,12 @@ for i in tasks_per_job:
         p_tasks[j] = json["tasks"][j][
             "processing_time"
         ]  ##Dictionnaire des processing time par tâche
-        m_tasks[j] = json["tasks"][j][
-            "machines"
+        m_tasks[j] = [json["tasks"][j][
+            "machines"][k]["machine"] for k in range(len(json["tasks"][j]["machines"]))
         ]  ##Dictionnaire des machine par id de tâche
-        op_tasks[j] = json["tasks"][j][
-            "operator"
-        ]  ##Dictionnaire des opérateurs par id de tâche
+        op_tasks[j] = {}
+         ##Dictionnaire des opérateurs par id de tâche et de machine
+
 
 
 ### Decision variables
