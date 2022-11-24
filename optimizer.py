@@ -180,25 +180,20 @@ U = {j: m.addVar(vtype=GRB.BINARY, name=f"u_{j}") for j in range(n_jobs)}
 M = {
     (j, k): m.addVar(vtype=GRB.INTEGER, name=f"m_{j}_{k}")
     for j in range(n_jobs)
-    for k in range(tasks_per_job[j])
+    for k in (tasks_per_job[j])
 }
 
 # Task-operator assignment
 O = {
     (j, k): m.addVar(vtype=GRB.INTEGER, name=f"o_{j}_{k}")
     for j in range(n_jobs)
-    for k in range(tasks_per_job[j])
+    for k in (tasks_per_job[j])
 }
 
 # One Task indicator
-Y = {
-    (j, k, jp, kp): m.addVar(vtype=GRB.BINARY, name=f"o_{j}_{k}_{jp}_{kp}")
-    for j in range(n_jobs)
-    for k in range(tasks_per_job[j])
-    for jp in range(n_jobs)
-    for kp in range(tasks_per_job[jp])
-}
+Y = {}
 
+### Constraints
 for j in range(1, n_jobs):
     for k in range(2, tasks_per_job[j] + 1):
         m.addConstr(B[(j, k)] >= B[(j, k - 1)] + p_tasks[(j, k)])
@@ -219,8 +214,13 @@ for j in range(1, n_jobs + 1):
     m.addConstr(T[j] <= M * U[j])
 
 for j in range(1, n_jobs):
-    for k in range(2, tasks_per_job[j] + 1):
+    for k in range(1, tasks_per_job[j] + 1):
         m.addConstr(B[(j, k)] >= B[(j, k - 1)] + p_tasks[(j, k)])
+
+
+
+# Optimize model
+m.optimize()
 
 for v in m.getVars():
     print("%s %g" % (v.VarName, v.X))
