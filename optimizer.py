@@ -192,7 +192,7 @@ O = {
 
 # One Task indicator
 X = {
-    (j, k, jp, kp): m.addVar(vtype=GRB.BINARY, name=f"x_{j}_{k}")
+    (j, k, jp, kp): m.addVar(vtype=GRB.BINARY, name=f"x_{j}_{k}_{jp}_{kp}")
     for j in job_names
     for k in (tasks_per_job[j])
     for jp in job_names
@@ -200,7 +200,7 @@ X = {
 }  ##X indique si en dessous ou au dessus de l'intervalle de temps
 
 Y = {
-    (j, k, jp, kp): m.addVar(vtype=GRB.BINARY, name=f"y_{j}_{k}")
+    (j, k, jp, kp): m.addVar(vtype=GRB.BINARY, name=f"y_{j}_{k}_{jp}_{kp}")
     for j in job_names
     for k in (tasks_per_job[j])
     for jp in job_names
@@ -208,7 +208,7 @@ Y = {
 }  ##Y indique si la tâche est réalisée ou non par la même machine
 
 Z = {
-    (j, k, jp, kp): m.addVar(vtype=GRB.BINARY, name=f"z_{j}_{k}")
+    (j, k, jp, kp): m.addVar(vtype=GRB.BINARY, name=f"z_{j}_{k}_{jp}_{kp}")
     for j in job_names
     for k in (tasks_per_job[j])
     for jp in job_names
@@ -217,7 +217,7 @@ Z = {
 
 # Vars A1, A2, A3, A4
 A1 = {
-    (j, k, jp, kp): m.addVar(vtype=GRB.BINARY, name=f"a1_{j}_{k}")
+    (j, k, jp, kp): m.addVar(vtype=GRB.BINARY, name=f"a1_{j}_{k}_{jp}_{kp}")
     for j in job_names
     for k in (tasks_per_job[j])
     for jp in job_names
@@ -225,7 +225,7 @@ A1 = {
 }
 
 A2 = {
-    (j, k, jp, kp): m.addVar(vtype=GRB.BINARY, name=f"a2_{j}_{k}")
+    (j, k, jp, kp): m.addVar(vtype=GRB.BINARY, name=f"a2_{j}_{k}_{jp}_{kp}")
     for j in job_names
     for k in (tasks_per_job[j])
     for jp in job_names
@@ -233,19 +233,21 @@ A2 = {
 }
 
 A3 = {
-    (j, k, jp, kp): m.addVar(vtype=GRB.BINARY, name=f"a3_{j}_{k}")
+    (j, k, jp, kp): m.addVar(vtype=GRB.BINARY, name=f"a3_{j}_{k}_{jp}_{kp}")
     for j in job_names
     for k in (tasks_per_job[j])
     for jp in job_names
     for kp in (tasks_per_job[jp])
 }
 A4 = {
-    (j, k, jp, kp): m.addVar(vtype=GRB.BINARY, name=f"a4_{j}_{k}")
+    (j, k, jp, kp): m.addVar(vtype=GRB.BINARY, name=f"a4_{j}_{k}_{jp}_{kp}")
     for j in job_names
     for k in (tasks_per_job[j])
     for jp in job_names
     for kp in (tasks_per_job[jp])
 }
+
+
 
 
 ### Constraints
@@ -287,8 +289,8 @@ for j in job_names:
                 m.addConstr(Y[(j, k, jp, kp)] = A1[(j, k, jp, kp)] + A2[(j, k, jp, kp)])
                 m.addConstr(A3[(j, k, jp, kp)] + A4[(j, k, jp, kp)] <= 1)
                 m.addConstr(Z[(j, k, jp, kp)] = A1[(j, k, jp, kp)] + A2[(j, k, jp, kp)])
-                m.addConstr(O[(j,k)] - O[jp,kp] >= -inf*A3[(j, k, jp, kp)] + A4[(j, k, jp, kp)])
-                m.addConstr(O[(j,k)] - O[jp,kp] <= -A3[(j, k, jp, kp)] + inf*A4[(j, k, jp, kp)])
+                m.addConstr(O[(j,k)] - O[(jp,kp)] >= -inf*A3[(j, k, jp, kp)] + A4[(j, k, jp, kp)])
+                m.addConstr(O[(j,k)] - O[(jp,kp)] <= -A3[(j, k, jp, kp)] + inf*A4[(j, k, jp, kp)])
 
 
 
