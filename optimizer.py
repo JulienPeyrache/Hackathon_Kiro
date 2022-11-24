@@ -152,14 +152,14 @@ op_task_machine = (
 )  ##Dictio des opérateurs par tâche et par machine (clé = nom de la tâche puis de la machine)
 for i in tasks_per_job:
     for j in tasks_per_job[i]:
-        p_tasks[j] = json["tasks"][j]["processing_time"]
+        p_tasks[j] = json["tasks"][j - 1]["processing_time"]
         m_tasks[j] = [
             json["tasks"][j]["machines"][k]["machine"]
-            for k in range(len(json["tasks"][j]["machines"]))
+            for k in range(len(json["tasks"][j - 1]["machines"]))
         ]
         op_task_machine[j] = {}
-        for k in json["tasks"]["machines"]:
-            op_task_machine[j][k["machine"]] = k["operators"]
+        for k in json["tasks"][j - 1]["machines"]:
+            op_task_machine[j - 1][k["machine"]] = k["operators"]
 ### Decision variables
 
 # beginning of tasks of jobs
