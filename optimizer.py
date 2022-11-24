@@ -112,7 +112,7 @@ def parser(filename):
 
 json = parser("sujet/tiny.json")
 
-from gurobipy import Model
+from gurobipy import *
 
 m = Model("trs0")
 
@@ -164,13 +164,10 @@ for i in tasks_per_job:
 
 # beginning of tasks of jobs
 B = {
-    (j, k): m.addVar(vtype=GRB.INTEGER, name=f"b_{j}_{k}")
+    k: m.addVar(vtype=GRB.INTEGER, name=f"b_{k}")
     for j in job_names
     for k in range(tasks_per_job[j])
 }
-
-# ending of tasks of jobs
-# c = {(j,k) : m.addVar(vtype = GRB.INTEGER, name = f'c_{j}_{k}') for j in range(n_jobs) for k in range(n_tasks_per_job[j])}
 
 # tardiness of jobs
 T = {j: m.addVar(vtype=GRB.INTEGER, name=f"t_{j}") for j in job_names}
@@ -178,85 +175,82 @@ U = {j: m.addVar(vtype=GRB.BINARY, name=f"u_{j}") for j in job_names}
 
 # Task-machine assignment
 M = {
-    (j, k): m.addVar(vtype=GRB.INTEGER, name=f"m_{j}_{k}")
+    k: m.addVar(vtype=GRB.INTEGER, name=f"m_{k}")
     for j in job_names
-    for k in (tasks_per_job[j])
+    for k in tasks_per_job[j]
 }
 
 # Task-operator assignment
 O = {
-    (j, k): m.addVar(vtype=GRB.INTEGER, name=f"o_{j}_{k}")
+    k: m.addVar(vtype=GRB.INTEGER, name=f"o_{j}_{k}")
     for j in job_names
-    for k in (tasks_per_job[j])
+    for k in tasks_per_job[j]
 }
 
 # One Task indicator
 X = {
-    (j, k, jp, kp): m.addVar(vtype=GRB.BINARY, name=f"x_{j}_{k}_{jp}_{kp}")
+    (k, kp): m.addVar(vtype=GRB.BINARY, name=f"x_{j}_{k}_{jp}_{kp}")
     for j in job_names
-    for k in (tasks_per_job[j])
+    for k in tasks_per_job[j]
     for jp in job_names
-    for kp in (tasks_per_job[jp])
+    for kp in tasks_per_job[jp]
 }  ##X indique si en dessous ou au dessus de l'intervalle de temps
 
 Y = {
-    (j, k, jp, kp): m.addVar(vtype=GRB.BINARY, name=f"y_{j}_{k}_{jp}_{kp}")
+    (k, kp): m.addVar(vtype=GRB.BINARY, name=f"y_{j}_{k}_{jp}_{kp}")
     for j in job_names
-    for k in (tasks_per_job[j])
+    for k in tasks_per_job[j]
     for jp in job_names
-    for kp in (tasks_per_job[jp])
+    for kp in tasks_per_job[jp]
 }  ##Y indique si la tâche est réalisée ou non par la même machine
 
 Z = {
-    (j, k, jp, kp): m.addVar(vtype=GRB.BINARY, name=f"z_{j}_{k}_{jp}_{kp}")
+    (k, kp): m.addVar(vtype=GRB.BINARY, name=f"z_{j}_{k}_{jp}_{kp}")
     for j in job_names
-    for k in (tasks_per_job[j])
+    for k in tasks_per_job[j]
     for jp in job_names
-    for kp in (tasks_per_job[jp])
+    for kp in tasks_per_job[jp]
 }  ##Z indique si la tâche est réalisée ou non par le même opérateur
 
 # Vars A1, A2, A3, A4
 A1 = {
-    (j, k, jp, kp): m.addVar(vtype=GRB.BINARY, name=f"a1_{j}_{k}_{jp}_{kp}")
+    (k, kp): m.addVar(vtype=GRB.BINARY, name=f"a1_{j}_{k}_{jp}_{kp}")
     for j in job_names
-    for k in (tasks_per_job[j])
+    for k in tasks_per_job[j]
     for jp in job_names
-    for kp in (tasks_per_job[jp])
+    for kp in tasks_per_job[jp]
 }
 
 A2 = {
-    (j, k, jp, kp): m.addVar(vtype=GRB.BINARY, name=f"a2_{j}_{k}_{jp}_{kp}")
+    (k, kp): m.addVar(vtype=GRB.BINARY, name=f"a2_{j}_{k}_{jp}_{kp}")
     for j in job_names
-    for k in (tasks_per_job[j])
+    for k in tasks_per_job[j]
     for jp in job_names
-    for kp in (tasks_per_job[jp])
+    for kp in tasks_per_job[jp]
 }
 
 A3 = {
-    (j, k, jp, kp): m.addVar(vtype=GRB.BINARY, name=f"a3_{j}_{k}_{jp}_{kp}")
+    (k, kp): m.addVar(vtype=GRB.BINARY, name=f"a3_{j}_{k}_{jp}_{kp}")
     for j in job_names
-    for k in (tasks_per_job[j])
+    for k in tasks_per_job[j]
     for jp in job_names
-    for kp in (tasks_per_job[jp])
+    for kp in tasks_per_job[jp]
 }
 A4 = {
-    (j, k, jp, kp): m.addVar(vtype=GRB.BINARY, name=f"a4_{j}_{k}_{jp}_{kp}")
+    (k, kp): m.addVar(vtype=GRB.BINARY, name=f"a4_{j}_{k}_{jp}_{kp}")
     for j in job_names
-    for k in (tasks_per_job[j])
+    for k in tasks_per_job[j]
     for jp in job_names
-    for kp in (tasks_per_job[jp])
+    for kp in tasks_per_job[jp]
 }
-
-
-
 
 ### Constraints
 for j in job_names:
     for i in range(1,len(tasks_per_job[j])):
-        m.addConstr(B[(j, tasks_per_job[j][i])] >= B[(j, tasks_per_job[j][i-1])] + p_tasks[tasks_per_job[j][i]])
+        m.addConstr(B[tasks_per_job[j][i]] >= B[tasks_per_job[j][i-1]] + p_tasks[tasks_per_job[j][i]])
 
 for j in job_names:
-    m.addConstr(B[(j, 1)] >= r[j])
+    m.addConstr(B[tasks_per_job[j][0]] >= r[j])
 
 for j in job_names:
     m.addConstr(T[j] >= 0)
@@ -274,23 +268,20 @@ for j in job_names:
     for k in tasks_per_job[j]:
         for jp in job_names:
             for kp in tasks_per_job[jp]:
-                m.addConstr(B[(jp, kp)] <= B[(j, k)] - 1 + inf*X[(j, k, jp, kp)] + inf*Y[(j, k, jp, kp)])
-                m.addConstr(B[(jp, kp)] >= B[(j, k)] + p_tasks[k] + inf*(1-X[(j, k, jp, kp)]) + inf*Y[(j, k, jp, kp)])
-                m.addConstr(B[(jp, kp)] <= B[(j, k)] - 1 + inf*X[(j, k, jp, kp)] + inf*Z[(j, k, jp, kp)])
-                m.addConstr(B[(jp, kp)] >= B[(j, k)] + p_tasks[k] + inf*(1-X[(j, k, jp, kp)]) + inf*Z[(j, k, jp, kp)])
+                m.addConstr(B[kp] <= B[k] - 1 + inf*X[(k, kp)] + inf*Y[(k, kp)])
+                m.addConstr(B[kp] >= B[k] + p_tasks[k] + inf*(1-X[(k, kp)]) + inf*Y[(k, kp)])
+                m.addConstr(B[kp] <= B[k] - 1 + inf*X[(k, kp)] + inf*Z[(k, kp)])
+                m.addConstr(B[kp] >= B[k] + p_tasks[k] + inf*(1-X[(k, kp)]) + inf*Z[(k, kp)])
 
-for j in job_names:
-    for k in tasks_per_job[j]:
-        for jp in job_names:
-            for kp in tasks_per_job[jp]:
-                m.addConstr(M[(j,k)] - M[jp,kp] >= -inf*A1[(j, k, jp, kp)] + A2[(j, k, jp, kp)])
-                m.addConstr(M[(j,k)] - M[jp,kp] <= -A1[(j, k, jp, kp)] + inf*A2[(j, k, jp, kp)])
-                m.addConstr(A1[(j, k, jp, kp)] + A2[(j, k, jp, kp)] <= 1)
-                m.addConstr(Y[(j, k, jp, kp)] = A1[(j, k, jp, kp)] + A2[(j, k, jp, kp)])
-                m.addConstr(A3[(j, k, jp, kp)] + A4[(j, k, jp, kp)] <= 1)
-                m.addConstr(Z[(j, k, jp, kp)] = A1[(j, k, jp, kp)] + A2[(j, k, jp, kp)])
-                m.addConstr(O[(j,k)] - O[(jp,kp)] >= -inf*A3[(j, k, jp, kp)] + A4[(j, k, jp, kp)])
-                m.addConstr(O[(j,k)] - O[(jp,kp)] <= -A3[(j, k, jp, kp)] + inf*A4[(j, k, jp, kp)])
+                m.addConstr(M[k] - M[jp,kp] >= -inf*A1[(k, kp)] + A2[(k, kp)])
+                m.addConstr(M[k] - M[jp,kp] <= -A1[(k, kp)] + inf*A2[(k, kp)])
+                m.addConstr(A1[(k, kp)] + A2[(k, kp)] <= 1)
+                m.addConstr(Y[(k, kp)] == A1[(k, kp)] + A2[(k, kp)])
+                
+                m.addConstr(A3[(k, kp)] + A4[(k, kp)] <= 1)
+                m.addConstr(Z[(k, kp)] == A1[(k, kp)] + A2[(k, kp)])
+                m.addConstr(O[k] - O[kp] >= -inf*A3[(k, kp)] + A4[(k, kp)])
+                m.addConstr(O[k] - O[kp] <= -A3[(k, kp)] + inf*A4[(k, kp)])
 
 
 
