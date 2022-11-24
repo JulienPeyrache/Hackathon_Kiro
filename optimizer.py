@@ -147,19 +147,18 @@ for i in range(n_jobs):
 p_tasks = {}  ##Dictio des durées des tâches (clé = nom de la tâche)
 op_tasks = {}  ##Dictio des opérateurs des tâches (clé = nom de la tâche)
 m_tasks = {}  ##Dictio des machines des tâches (clé = nom de la tâche)
+op_task_machine = {}  ##Dictio des opérateurs par tâche et par machine (clé = nom de la tâche puis de la machine)
 for i in tasks_per_job:
     for j in tasks_per_job[i]:
         p_tasks[j] = json["tasks"][j][
             "processing_time"
-        ]  ##Dictionnaire des processing time par tâche
+        ]
         m_tasks[j] = [json["tasks"][j][
             "machines"][k]["machine"] for k in range(len(json["tasks"][j]["machines"]))
-        ]  ##Dictionnaire des machine par id de tâche
-        op_tasks[j] = {}
-         ##Dictionnaire des opérateurs par id de tâche et de machine
-
-
-
+        ]  
+        op_task_machine[j]={}
+        for k in json["tasks"]["machines"]:
+            op_task_machine[j][k["machine"]] = k["operators"]
 ### Decision variables
 
 # beginning of tasks of jobs
