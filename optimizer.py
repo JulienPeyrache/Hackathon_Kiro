@@ -216,3 +216,9 @@ for j in range(1, n_jobs + 1):
         + M * (1 - U[j])
     )
     m.addConstr(T[j] <= M * U[j])
+
+
+for v in m.getVars():
+    print("%s %g" % (v.VarName, v.X))
+
+print("Obj: %g" % m.ObjVal)
