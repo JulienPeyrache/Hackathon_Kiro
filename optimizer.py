@@ -1,5 +1,7 @@
 from functools import reduce
 import re
+
+from gurobipy import *
 import pprint
 
 
@@ -111,8 +113,6 @@ def parser(filename):
 
 
 json = parser("sujet/tiny.json")
-
-from gurobipy import *
 
 m = Model("trs0")
 
@@ -243,7 +243,20 @@ A4 = {
     for jp in job_names
     for kp in tasks_per_job[jp]
 }
+Lambda_o = {
+    (k, m, op_tasks): m.addVar(vtype=GRB.BINARY, name=f"lambda_o_{k}_{m}_{op}")
+    for j in job_names
+    for k in tasks_per_job[j]
+    for m in m_tasks[k]
+    for op in op_task_machine[k][m]
+}
 
+Lambda_m = {
+    (k, m): m.addVar(vtype=GRB.BINARY, name=f"lambda_m_{k}_{m}")
+    for j in job_names
+    for k in tasks_per_job[j]
+    for m in m_tasks[k]
+}
 
 ### Constraints
 for j in job_names:
@@ -295,6 +308,29 @@ for j in job_names:
                 m.addConstr(Z[(k, kp)] == A1[(k, kp)] + A2[(k, kp)])
                 m.addConstr(O[k] - O[kp] >= -inf * A3[(k, kp)] + A4[(k, kp)])
                 m.addConstr(O[k] - O[kp] <= -A3[(k, kp)] + inf * A4[(k, kp)])
+
+##Linexpr constraints
+
+for j in job_names:
+    for k in tasks_per_job[j]:
+        machine = LinExpr()
+        lambd = LinExpr()
+        for m in m_tasks[k]:
+            machine += Lambda_m[k, m] * m
+            lambd += Lambda_m[k, m]
+        m.addConstr(M[k] == machine)
+        m.addConstr(lambd == 1)
+
+for j in job_names:
+    for k in tasks_per_job[j]:
+        operateur = LinExpr()
+        lambd = LinExpr()
+        for m in m_tasks[k]:
+            for op in op_task_machine[k][m]:
+                operateur += Lambda_o[k, m] * op
+                lambd += Lambda_o[k, m]
+        m.addConstr(O[k] == operateur)
+        m.addConstr(lambd == 1)
 
 
 # Optimize model
