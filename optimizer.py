@@ -117,15 +117,29 @@ M = 1000000000
 n_machines = json["parameters"]["size"]["nb_machines"] ##Nombre de machines
 n_operators = json["parameters"]["size"]["nb_operators"] ##Nombre d'opérateurs
 n_jobs = json["parameters"]["size"]["nb_jobs"] ##Nombre de jobs
-n_tasks_per_job = [len(json["jobs"][i]["sequence"])i for i in range(1,n_jobs+1)] ##Nombre de tâches par job
-n_tasks = sum(n_tasks_per_job) ##Nombre de tâches
-weight_per_job = [json["jobs"][i]["weight"] for i in range(1,n_jobs+1)] ##Poids des jobs
-due_date_per_job = [json["jobs"][i]["due_date"] for i in range(1,n_jobs+1)] ##Date d'échéance des jobs
-release_date_per_job = [json["jobs"][i]["release_date"] for i in range(1,n_jobs+1)] ##Date de début des jobs
-jobs = [json["jobs"][i]["sequence"] for i in range(1,n_jobs+1)] ##Dictionnaire des tâches par job
-p_tasks = [json["tasks"][i]["processing_time"] for i in range(1,n_tasks+1)] ##Dictionnaire des processing time par tâche
-m_tasks = [json["tasks"][i]["machine"] for i in range(1,n_tasks+1)] ##Dictionnaire des machine par id de tâche
-op_tasks = [json["tasks"][i]["operator"] for i in range(1,n_tasks+1)] ##Dictionnaire des opérateurs par id de tâche
+job_names = [json["jobs"][i]["job"] for i in range(n_jobs)] ##Nom effectif des jobs
+
+
+tasks_per_job ={}
+for i in range(n_jobs):
+    tasks_per_job[json["jobs"][i]["job"]] = json["jobs"][i]["sequence"] ##Nombre de tâches par job
+
+w={}
+d={}
+r = {}
+for i in range(n_jobs):
+    w[json["jobs"][i]["job"]] = json["jobs"][i]["weight"] ##Poids des jobs
+    d[json["jobs"][i]["job"]] = json["jobs"][i]["due_date"] ##Date limite de fin des jobs
+    r[json["jobs"][i]["job"]] = json["jobs"][i]["release_date"] ##Date de début des jobs
+
+p_tasks = {}
+op_tasks = {}
+m_tasks = {}
+for i in tasks_per_job:
+    for j in tasks_per_job[i]:
+        p_tasks[j] = json["tasks"][j]["processing_time"] ##Dictionnaire des processing time par tâche
+        m_tasks[j] = json["tasks"][j]["machine"] ##Dictionnaire des machine par id de tâche
+        op_tasks[j] = json["tasks"][j]["operator"] ##Dictionnaire des opérateurs par id de tâche
 
 ### Decision variables
 # beginning of tasks of jobs
