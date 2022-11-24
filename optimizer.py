@@ -153,7 +153,7 @@ for i in tasks_per_job:
             "processing_time"
         ]  ##Dictionnaire des processing time par tâche
         m_tasks[j] = json["tasks"][j][
-            "machine"
+            "machines"
         ]  ##Dictionnaire des machine par id de tâche
         op_tasks[j] = json["tasks"][j][
             "operator"
@@ -239,6 +239,13 @@ A3 = {
     for jp in job_names
     for kp in (tasks_per_job[jp])
 }
+A4 = {
+    (j, k, jp, kp): m.addVar(vtype=GRB.BINARY, name=f"a4_{j}_{k}")
+    for j in job_names
+    for k in (tasks_per_job[j])
+    for jp in job_names
+    for kp in (tasks_per_job[jp])
+}
 
 
 ### Constraints
@@ -265,10 +272,24 @@ for j in job_names:
     for k in tasks_per_job[j]:
         for jp in job_names:
             for kp in tasks_per_job[jp]:
-                m.addConstr(B[(jp, kp)] <= B[(j, k)] - 1 + inf*x[(j, k, jp, kp)] + inf*y[(j, k, jp, kp)])
-                m.addConstr(B[(jp, kp)] >= B[(j, k)] + p_tasks[k] + inf*(1-x[(j, k, jp, kp)]) + inf*y[(j, k, jp, kp)])
-                m.addConstr(B[(jp, kp)] <= B[(j, k)] - 1 + inf*x[(j, k, jp, kp)] + inf*z[(j, k, jp, kp)])
-                m.addConstr(B[(jp, kp)] >= B[(j, k)] + p_tasks[k] + inf*(1-x[(j, k, jp, kp)]) + inf*z[(j, k, jp, kp)])
+                m.addConstr(B[(jp, kp)] <= B[(j, k)] - 1 + inf*X[(j, k, jp, kp)] + inf*Y[(j, k, jp, kp)])
+                m.addConstr(B[(jp, kp)] >= B[(j, k)] + p_tasks[k] + inf*(1-X[(j, k, jp, kp)]) + inf*Y[(j, k, jp, kp)])
+                m.addConstr(B[(jp, kp)] <= B[(j, k)] - 1 + inf*X[(j, k, jp, kp)] + inf*Z[(j, k, jp, kp)])
+                m.addConstr(B[(jp, kp)] >= B[(j, k)] + p_tasks[k] + inf*(1-X[(j, k, jp, kp)]) + inf*Z[(j, k, jp, kp)])
+
+for j in job_names:
+    for k in tasks_per_job[j]:
+        for jp in job_names:
+            for kp in tasks_per_job[jp]:
+                m.addConstr(M[(j,k)] - M[jp,kp] >= -inf*A1[(j, k, jp, kp)] + A2[(j, k, jp, kp)])
+                m.addConstr(M[(j,k)] - M[jp,kp] <= -A1[(j, k, jp, kp)] + inf*A2[(j, k, jp, kp)])
+                m.addConstr(A1[(j, k, jp, kp)] + A2[(j, k, jp, kp)] <= 1)
+                m.addConstr(Y[(j, k, jp, kp)] = A1[(j, k, jp, kp)] + A2[(j, k, jp, kp)])
+                m.addConstr(A3[(j, k, jp, kp)] + A4[(j, k, jp, kp)] <= 1)
+                m.addConstr(Z[(j, k, jp, kp)] = A1[(j, k, jp, kp)] + A2[(j, k, jp, kp)])
+                m.addConstr(O[(j,k)] - O[jp,kp] >= -inf*A3[(j, k, jp, kp)] + A4[(j, k, jp, kp)])
+                m.addConstr(O[(j,k)] - O[jp,kp] <= -A3[(j, k, jp, kp)] + inf*A4[(j, k, jp, kp)])
+
 
 
 
