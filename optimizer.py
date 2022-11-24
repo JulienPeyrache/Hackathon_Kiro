@@ -23,7 +23,6 @@ def array_parser(data):
             return None
         data = res[1].strip()
 
-
 def boolean_parser(data):
     if data[0:4] == "true":
         return [True, data[4:].strip()]
@@ -289,28 +288,23 @@ for j in job_names:
     for k in tasks_per_job[j]:
         for jp in job_names:
             for kp in tasks_per_job[jp]:
-                mod.addConstr(B[kp] <= B[k] - 1 + inf * X[(k, kp)] + inf * Y[(k, kp)])
-                mod.addConstr(
-                    B[kp]
-                    >= B[k] + p_tasks[k] + inf * (1 - X[(k, kp)]) + inf * Y[(k, kp)]
-                )
-                mod.addConstr(B[kp] <= B[k] - 1 + inf * X[(k, kp)] + inf * Z[(k, kp)])
-                mod.addConstr(
-                    B[kp]
-                    >= B[k] + p_tasks[k] + inf * (1 - X[(k, kp)]) + inf * Z[(k, kp)]
-                )
+                if kp!=k:
+                    mod.addConstr(B[kp] <= B[k] - 1 + inf * X[(k, kp)] + inf * Y[(k, kp)])
+                    mod.addConstr(B[kp] >= B[k] + p_tasks[k] - inf * (1 - X[(k, kp)]) - inf * Y[(k, kp)])
+                    mod.addConstr(B[kp] <= B[k] - 1 + inf * X[(k, kp)] + inf * Z[(k, kp)])
+                    mod.addConstr(B[kp] >= B[k] + p_tasks[k] - inf * (1 - X[(k, kp)]) - inf * Z[(k, kp)])
 
-                mod.addConstr(M[k] - M[kp] >= -inf * A1[(k, kp)] + A2[(k, kp)])
-                mod.addConstr(M[k] - M[kp] <= -A1[(k, kp)] + inf * A2[(k, kp)])
-                mod.addConstr(A1[(k, kp)] + A2[(k, kp)] <= 1)
-                mod.addConstr(Y[(k, kp)] == A1[(k, kp)] + A2[(k, kp)])
+                    mod.addConstr(M[k] - M[kp] >= -inf * A1[(k, kp)] + A2[(k, kp)])
+                    mod.addConstr(M[k] - M[kp] <= -A1[(k, kp)] + inf * A2[(k, kp)])
+                    mod.addConstr(A1[(k, kp)] + A2[(k, kp)] <= 1)
+                    mod.addConstr(Y[(k, kp)] == A1[(k, kp)] + A2[(k, kp)])
 
-                mod.addConstr(A3[(k, kp)] + A4[(k, kp)] <= 1)
-                mod.addConstr(Z[(k, kp)] == A1[(k, kp)] + A2[(k, kp)])
-                mod.addConstr(O[k] - O[kp] >= -inf * A3[(k, kp)] + A4[(k, kp)])
-                mod.addConstr(O[k] - O[kp] <= -A3[(k, kp)] + inf * A4[(k, kp)])
+                    mod.addConstr(A3[(k, kp)] + A4[(k, kp)] <= 1)
+                    mod.addConstr(Z[(k, kp)] == A1[(k, kp)] + A2[(k, kp)])
+                    mod.addConstr(O[k] - O[kp] >= -inf * A3[(k, kp)] + A4[(k, kp)])
+                    mod.addConstr(O[k] - O[kp] <= -A3[(k, kp)] + inf * A4[(k, kp)])
 
-##Linexpr constraints
+# ##Linexpr constraints
 
 for j in job_names:
     for k in tasks_per_job[j]:
