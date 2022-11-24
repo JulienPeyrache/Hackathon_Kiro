@@ -194,28 +194,35 @@ O = {
 Y = {}
 
 ### Constraints
-for j in range(1, n_jobs):
-    for k in range(2, tasks_per_job[j] + 1):
-        m.addConstr(B[(j, k)] >= B[(j, k - 1)] + p_tasks[(j, k)])
+for j in job_names:
+    for i in range(1,len(tasks_per_job[j])):
+        m.addConstr(B[(j, tasks_per_job[j][i])] >= B[(j, tasks_per_job[j][i-1])] + p_tasks[tasks_per_job[j][i]])
 
-for j in range(1, n_jobs + 1):
+for j in job_names:
     m.addConstr(B[(j, 1)] >= r[j])
 
-for j in range(1, n_jobs + 1):
+for j in job_names:
     m.addConstr(T[j] >= 0)
-    m.addConstr(T[j] >= B[(j, tasks_per_job[j])] + p[(j, tasks_per_job[j])] - d[j])
+    m.addConstr(T[j] >= B[(j, tasks_per_job[j][-1])] + p_tasks[tasks_per_job[j][-1]] - d[j])
     m.addConstr(
         T[j]
-        <= B[(j, tasks_per_job[j])]
-        + p_tasks[(j, tasks_per_job[j])]
+        <= B[(j, tasks_per_job[j][-1])]
+        + p_tasks[tasks_per_job[j][-1]]
         - d[j]
-        + M * (1 - U[j])
+        + inf * (1 - U[j])
     )
-    m.addConstr(T[j] <= M * U[j])
+    m.addConstr(T[j] <= inf * U[j])
 
-for j in range(1, n_jobs):
-    for k in range(1, tasks_per_job[j] + 1):
-        m.addConstr(B[(j, k)] >= B[(j, k - 1)] + p_tasks[(j, k)])
+for j in job_names:
+    for k in tasks_per_job[j]:
+        for jp in job_names:
+            for kp in tasks_per_job[jp]:
+                m.addConstr(B[(jp, kp)] <= B[(j, k)] - 1 + inf*x[(j, k, jp, kp)] + inf*y[(j, k, jp, kp)])
+                m.addConstr(B[(jp, kp)] >= B[(j, k)] + p_tasks[k] + inf*(1-x[(j, k, jp, kp)]) + inf*y[(j, k, jp, kp)])
+                m.addConstr(B[(jp, kp)] <= B[(j, k)] - 1 + inf*x[(j, k, jp, kp)] + inf*z[(j, k, jp, kp)])
+                m.addConstr(B[(jp, kp)] >= B[(j, k)] + p_tasks[k] + inf*(1-x[(j, k, jp, kp)]) + inf*z[(j, k, jp, kp)])
+
+
 
 
 
