@@ -1,25 +1,35 @@
 "parameters"
+<<<<<<< HEAD
+nom_sujet : chemin_json
+M : parameters, size, nb_operators
+J : parameters, size, nb_jobs
+O : parameters, size, nb_operators
+I : parameters, size, nb_tasks
+Uj : parameters, costs, unit_penalty
+Tj : parameters, costs, tardiness
+=======
 nom_sujet : nom_json
-M : nb_operators
+M : size, nb_operators
 J : nb_jobs
 O : nb_operators
 I : nb_tasks
 Uj : unit_penalty
 Tj : tardiness
+>>>>>>> 912c9e5 (variablesé)
 ? : interim
 
 "jobs"
-nom_sujet : nom_json
-j : job
-sj : sequence
-rj : release_date
-dj : due_date
-wj : weight
+nom_sujet : chemin_json
+j : parameters, jobs, job
+sj : parameters, jobs, sequence
+rj : parameters, jobs, release_date
+dj : parameters, jobs, due_date
+wj : parameters, jobs, weight
 
 "tasks"
-nom_sujet : nom_json
-i : task
-pi : processing_time
-Mi : machines
-    mi : machine
-    oim : operators
+nom_sujet : chemin_json
+i : parameters, tasks, task
+pi : parameters, tasks, processing_time
+Mi : parameters, tasks, machines
+mi : parameters, tasks, machines, machine
+oim : parameters, tasks, machines, operators

@@ -88,12 +88,19 @@ value_parser = all_parsers(
     object_parser,
     array_parser,
 )
+<<<<<<< HEAD
 def parser():
     with open("sujet/tiny.json", "r") as f:
+=======
+
+
+def parser(filename):
+    with open(filename, "r") as f:
+>>>>>>> 912c9e5 (variablesé)
         data = f.read()
     res = value_parser(data.strip())
     try:
-        return(res[0])
+        return res[0]
     except TypeError:
         print(None)
 
@@ -106,12 +113,19 @@ m = Model("trs0")
 # Très grand nombre
 M = 1000000000
 
-n_machines = parser[]
-n_operators = 10
-n_jobs = 10
-n_tasks_per_job = [i for i in range(10)]
-p={}
-r={}
+
+n_machines = json["parameters"]["size"]["nb_machines"] ##Nombre de machines
+n_operators = json["parameters"]["size"]["nb_operators"] ##Nombre d'opérateurs
+n_jobs = json["parameters"]["size"]["nb_jobs"] ##Nombre de jobs
+n_tasks_per_job = [len(json["jobs"][i]["sequence"])i for i in range(1,n_jobs+1)] ##Nombre de tâches par job
+n_tasks = sum(n_tasks_per_job) ##Nombre de tâches
+weight_per_job = [json["jobs"][i]["weight"] for i in range(1,n_jobs+1)] ##Poids des jobs
+due_date_per_job = [json["jobs"][i]["due_date"] for i in range(1,n_jobs+1)] ##Date d'échéance des jobs
+release_date_per_job = [json["jobs"][i]["release_date"] for i in range(1,n_jobs+1)] ##Date de début des jobs
+jobs = [json["jobs"][i]["sequence"] for i in range(1,n_jobs+1)] ##Dictionnaire des tâches par job
+p_tasks = [json["tasks"][i]["processing_time"] for i in range(1,n_tasks+1)] ##Dictionnaire des processing time par tâche
+m_tasks = [json["tasks"][i]["machine"] for i in range(1,n_tasks+1)] ##Dictionnaire des machine par id de tâche
+op_tasks = [json["tasks"][i]["operator"] for i in range(1,n_tasks+1)] ##Dictionnaire des opérateurs par id de tâche
 
 ### Decision variables
 # beginning of tasks of jobs
