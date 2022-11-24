@@ -120,21 +120,21 @@ n_jobs = json["parameters"]["size"]["nb_jobs"] ##Nombre de jobs
 job_names = [json["jobs"][i]["job"] for i in range(n_jobs)] ##Nom effectif des jobs
 
 
-tasks_per_job ={}
+tasks_per_job ={} ##Dictio des tâches par job (clé = nom du job)
 for i in range(n_jobs):
     tasks_per_job[json["jobs"][i]["job"]] = json["jobs"][i]["sequence"] ##Nombre de tâches par job
 
-w={}
-d={}
-r = {}
+w={} ##Dictio des poids des job (clé = nom du job)
+d={} ##Dictio des durées des jobs (clé = nom du job)
+r = {}  ##Dictio des ressources des jobs (clé = nom du job)
 for i in range(n_jobs):
     w[json["jobs"][i]["job"]] = json["jobs"][i]["weight"] ##Poids des jobs
     d[json["jobs"][i]["job"]] = json["jobs"][i]["due_date"] ##Date limite de fin des jobs
     r[json["jobs"][i]["job"]] = json["jobs"][i]["release_date"] ##Date de début des jobs
 
-p_tasks = {}
-op_tasks = {}
-m_tasks = {}
+p_tasks = {} ##Dictio des durées des tâches (clé = nom de la tâche)
+op_tasks = {} ##Dictio des opérateurs des tâches (clé = nom de la tâche)
+m_tasks = {} ##Dictio des machines des tâches (clé = nom de la tâche)
 for i in tasks_per_job:
     for j in tasks_per_job[i]:
         p_tasks[j] = json["tasks"][j]["processing_time"] ##Dictionnaire des processing time par tâche
