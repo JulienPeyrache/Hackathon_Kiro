@@ -106,7 +106,7 @@ def main():
         data = f.read()
     res = value_parser(data.strip())
     try:
-        pprint.pprint(res[0]["jobs"])
+        pprint.pprint(res[0])
     except TypeError:
         print(None)
 
