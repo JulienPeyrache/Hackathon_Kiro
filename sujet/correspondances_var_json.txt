@@ -1,4 +1,5 @@
 "parameters"
+<<<<<<< HEAD
 nom_sujet : chemin_json
 M : parameters, size, nb_operators
 J : parameters, size, nb_jobs
@@ -6,6 +7,15 @@ O : parameters, size, nb_operators
 I : parameters, size, nb_tasks
 Uj : parameters, costs, unit_penalty
 Tj : parameters, costs, tardiness
+=======
+nom_sujet : nom_json
+M : size, nb_operators
+J : nb_jobs
+O : nb_operators
+I : nb_tasks
+Uj : unit_penalty
+Tj : tardiness
+>>>>>>> 912c9e5 (variablesé)
 ? : interim
 
 "jobs"
