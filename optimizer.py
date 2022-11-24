@@ -159,7 +159,6 @@ for i in tasks_per_job:
             "operator"
         ]  ##Dictionnaire des opérateurs par id de tâche
 
-op
 
 ### Decision variables
 # beginning of tasks of jobs
@@ -173,8 +172,8 @@ B = {
 # c = {(j,k) : m.addVar(vtype = GRB.INTEGER, name = f'c_{j}_{k}') for j in range(n_jobs) for k in range(n_tasks_per_job[j])}
 
 # tardiness of jobs
-T = {j : m.addVar(vtype = GRB.INTEGER, name = f't_{j}') for j in range(n_jobs)}
-U = {j : m.addVar(vtype = GRB.BINARY, name = f'u_{j}') for j in range(n_jobs)}
+T = {j: m.addVar(vtype=GRB.INTEGER, name=f"t_{j}") for j in range(n_jobs)}
+U = {j: m.addVar(vtype=GRB.BINARY, name=f"u_{j}") for j in range(n_jobs)}
 
 # Task-machine assignment
 M = {
@@ -199,15 +198,21 @@ Y = {
     for kp in range(tasks_per_job[jp])
 }
 
-for j in range(1,n_jobs):
-  for k in  range(2,n_tasks_per_job[j]+1):
-    m.addConstr(B[(j,k)] >= B[(j,k-1)]+p[(j,k)])
+for j in range(1, n_jobs):
+    for k in range(2, tasks_per_job[j] + 1):
+        m.addConstr(B[(j, k)] >= B[(j, k - 1)] + p_tasks[(j, k)])
 
-for j in range(1,n_jobs+1):
-  m.addConstr(B[(j,1)] >= r[j])
+for j in range(1, n_jobs + 1):
+    m.addConstr(B[(j, 1)] >= r[j])
 
-for j in range(1,n_jobs+1):
-  m.addConstr(T[j] >= 0)
-  m.addConstr(T[j] >= B[(j,n_tasks_per_job[j])] + p[(j,n_tasks_per_job[j])] - d[j])
-  m.addConstr(T[j] <= B[(j,n_tasks_per_job[j])] + p[(j,n_tasks_per_job[j])] - d[j] + M*(1-U[j]))
-  m.addConstr(T[j] <= M*U[j])
+for j in range(1, n_jobs + 1):
+    m.addConstr(T[j] >= 0)
+    m.addConstr(T[j] >= B[(j, tasks_per_job[j])] + p[(j, tasks_per_job[j])] - d[j])
+    m.addConstr(
+        T[j]
+        <= B[(j, tasks_per_job[j])]
+        + p_tasks[(j, tasks_per_job[j])]
+        - d[j]
+        + M * (1 - U[j])
+    )
+    m.addConstr(T[j] <= M * U[j])
