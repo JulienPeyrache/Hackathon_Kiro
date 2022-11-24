@@ -119,7 +119,8 @@ mod = Model("trs0")
 # Très grand nombre
 inf = 1000000000
 
-
+beta = json["parameters"]["costs"]["tardiness"]
+alpha = json["parameters"]["costs"]["unit_penalty"]
 n_machines = json["parameters"]["size"]["nb_machines"]  ##Nombre de machines
 n_operators = json["parameters"]["size"]["nb_operators"]  ##Nombre d'opérateurs
 n_jobs = json["parameters"]["size"]["nb_jobs"]  ##Nombre de jobs
