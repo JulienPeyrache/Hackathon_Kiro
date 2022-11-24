@@ -114,7 +114,7 @@ def parser(filename):
 
 json = parser("sujet/tiny.json")
 
-m = Model("trs0")
+mod = Model("trs0")
 
 # Très grand nombre
 inf = 1000000000
@@ -154,42 +154,42 @@ for i in tasks_per_job:
     for j in tasks_per_job[i]:
         p_tasks[j] = json["tasks"][j - 1]["processing_time"]
         m_tasks[j] = [
-            json["tasks"][j]["machines"][k]["machine"]
+            json["tasks"][j-1]["machines"][k-1]["machine"]
             for k in range(len(json["tasks"][j - 1]["machines"]))
         ]
         op_task_machine[j] = {}
         for k in json["tasks"][j - 1]["machines"]:
-            op_task_machine[j - 1][k["machine"]] = k["operators"]
+            op_task_machine[j][k["machine"]] = k["operators"]
 ### Decision variables
 
 # beginning of tasks of jobs
 B = {
-    k: m.addVar(vtype=GRB.INTEGER, name=f"b_{k}")
+    k: mod.addVar(vtype=GRB.INTEGER, name=f"b_{k}")
     for j in job_names
-    for k in range(tasks_per_job[j])
+    for k in tasks_per_job[j]
 }
 
 # tardiness of jobs
-T = {j: m.addVar(vtype=GRB.INTEGER, name=f"t_{j}") for j in job_names}
-U = {j: m.addVar(vtype=GRB.BINARY, name=f"u_{j}") for j in job_names}
+T = {j: mod.addVar(vtype=GRB.INTEGER, name=f"t_{j}") for j in job_names}
+U = {j: mod.addVar(vtype=GRB.BINARY, name=f"u_{j}") for j in job_names}
 
 # Task-machine assignment
 M = {
-    k: m.addVar(vtype=GRB.INTEGER, name=f"m_{k}")
+    k: mod.addVar(vtype=GRB.INTEGER, name=f"m_{k}")
     for j in job_names
     for k in tasks_per_job[j]
 }
 
 # Task-operator assignment
 O = {
-    k: m.addVar(vtype=GRB.INTEGER, name=f"o_{j}_{k}")
+    k: mod.addVar(vtype=GRB.INTEGER, name=f"o_{j}_{k}")
     for j in job_names
     for k in tasks_per_job[j]
 }
 
 # One Task indicator
 X = {
-    (k, kp): m.addVar(vtype=GRB.BINARY, name=f"x_{j}_{k}_{jp}_{kp}")
+    (k, kp): mod.addVar(vtype=GRB.BINARY, name=f"x_{j}_{k}_{jp}_{kp}")
     for j in job_names
     for k in tasks_per_job[j]
     for jp in job_names
@@ -197,7 +197,7 @@ X = {
 }  ##X indique si en dessous ou au dessus de l'intervalle de temps
 
 Y = {
-    (k, kp): m.addVar(vtype=GRB.BINARY, name=f"y_{j}_{k}_{jp}_{kp}")
+    (k, kp): mod.addVar(vtype=GRB.BINARY, name=f"y_{j}_{k}_{jp}_{kp}")
     for j in job_names
     for k in tasks_per_job[j]
     for jp in job_names
@@ -205,7 +205,7 @@ Y = {
 }  ##Y indique si la tâche est réalisée ou non par la même machine
 
 Z = {
-    (k, kp): m.addVar(vtype=GRB.BINARY, name=f"z_{j}_{k}_{jp}_{kp}")
+    (k, kp): mod.addVar(vtype=GRB.BINARY, name=f"z_{j}_{k}_{jp}_{kp}")
     for j in job_names
     for k in tasks_per_job[j]
     for jp in job_names
@@ -214,7 +214,7 @@ Z = {
 
 # Vars A1, A2, A3, A4
 A1 = {
-    (k, kp): m.addVar(vtype=GRB.BINARY, name=f"a1_{j}_{k}_{jp}_{kp}")
+    (k, kp): mod.addVar(vtype=GRB.BINARY, name=f"a1_{j}_{k}_{jp}_{kp}")
     for j in job_names
     for k in tasks_per_job[j]
     for jp in job_names
@@ -222,7 +222,7 @@ A1 = {
 }
 
 A2 = {
-    (k, kp): m.addVar(vtype=GRB.BINARY, name=f"a2_{j}_{k}_{jp}_{kp}")
+    (k, kp): mod.addVar(vtype=GRB.BINARY, name=f"a2_{j}_{k}_{jp}_{kp}")
     for j in job_names
     for k in tasks_per_job[j]
     for jp in job_names
@@ -230,21 +230,21 @@ A2 = {
 }
 
 A3 = {
-    (k, kp): m.addVar(vtype=GRB.BINARY, name=f"a3_{j}_{k}_{jp}_{kp}")
+    (k, kp): mod.addVar(vtype=GRB.BINARY, name=f"a3_{j}_{k}_{jp}_{kp}")
     for j in job_names
     for k in tasks_per_job[j]
     for jp in job_names
     for kp in tasks_per_job[jp]
 }
 A4 = {
-    (k, kp): m.addVar(vtype=GRB.BINARY, name=f"a4_{j}_{k}_{jp}_{kp}")
+    (k, kp): mod.addVar(vtype=GRB.BINARY, name=f"a4_{j}_{k}_{jp}_{kp}")
     for j in job_names
     for k in tasks_per_job[j]
     for jp in job_names
     for kp in tasks_per_job[jp]
 }
 Lambda_o = {
-    (k, m, op_tasks): m.addVar(vtype=GRB.BINARY, name=f"lambda_o_{k}_{m}_{op}")
+    (k, m, op): mod.addVar(vtype=GRB.BINARY, name=f"lambda_o_{k}_{m}_{op}")
     for j in job_names
     for k in tasks_per_job[j]
     for m in m_tasks[k]
@@ -252,7 +252,7 @@ Lambda_o = {
 }
 
 Lambda_m = {
-    (k, m): m.addVar(vtype=GRB.BINARY, name=f"lambda_m_{k}_{m}")
+    (k, m): mod.addVar(vtype=GRB.BINARY, name=f"lambda_m_{k}_{m}")
     for j in job_names
     for k in tasks_per_job[j]
     for m in m_tasks[k]
@@ -261,53 +261,53 @@ Lambda_m = {
 ### Constraints
 for j in job_names:
     for i in range(1, len(tasks_per_job[j])):
-        m.addConstr(
+        mod.addConstr(
             B[tasks_per_job[j][i]]
             >= B[tasks_per_job[j][i - 1]] + p_tasks[tasks_per_job[j][i]]
         )
 
 
 for j in job_names:
-    m.addConstr(B[tasks_per_job[j][0]] >= r[j])
+    mod.addConstr(B[tasks_per_job[j][0]] >= r[j])
 
 for j in job_names:
-    m.addConstr(T[j] >= 0)
-    m.addConstr(
-        T[j] >= B[(j, tasks_per_job[j][-1])] + p_tasks[tasks_per_job[j][-1]] - d[j]
+    mod.addConstr(T[j] >= 0)
+    mod.addConstr(
+        T[j] >= B[tasks_per_job[j][-1]] + p_tasks[tasks_per_job[j][-1]] - d[j]
     )
-    m.addConstr(
+    mod.addConstr(
         T[j]
-        <= B[(j, tasks_per_job[j][-1])]
+        <= B[tasks_per_job[j][-1]]
         + p_tasks[tasks_per_job[j][-1]]
         - d[j]
         + inf * (1 - U[j])
     )
-    m.addConstr(T[j] <= inf * U[j])
+    mod.addConstr(T[j] <= inf * U[j])
 
 for j in job_names:
     for k in tasks_per_job[j]:
         for jp in job_names:
             for kp in tasks_per_job[jp]:
-                m.addConstr(B[kp] <= B[k] - 1 + inf * X[(k, kp)] + inf * Y[(k, kp)])
-                m.addConstr(
+                mod.addConstr(B[kp] <= B[k] - 1 + inf * X[(k, kp)] + inf * Y[(k, kp)])
+                mod.addConstr(
                     B[kp]
                     >= B[k] + p_tasks[k] + inf * (1 - X[(k, kp)]) + inf * Y[(k, kp)]
                 )
-                m.addConstr(B[kp] <= B[k] - 1 + inf * X[(k, kp)] + inf * Z[(k, kp)])
-                m.addConstr(
+                mod.addConstr(B[kp] <= B[k] - 1 + inf * X[(k, kp)] + inf * Z[(k, kp)])
+                mod.addConstr(
                     B[kp]
                     >= B[k] + p_tasks[k] + inf * (1 - X[(k, kp)]) + inf * Z[(k, kp)]
                 )
 
-                m.addConstr(M[k] - M[jp, kp] >= -inf * A1[(k, kp)] + A2[(k, kp)])
-                m.addConstr(M[k] - M[jp, kp] <= -A1[(k, kp)] + inf * A2[(k, kp)])
-                m.addConstr(A1[(k, kp)] + A2[(k, kp)] <= 1)
-                m.addConstr(Y[(k, kp)] == A1[(k, kp)] + A2[(k, kp)])
+                mod.addConstr(M[k] - M[kp] >= -inf * A1[(k, kp)] + A2[(k, kp)])
+                mod.addConstr(M[k] - M[kp] <= -A1[(k, kp)] + inf * A2[(k, kp)])
+                mod.addConstr(A1[(k, kp)] + A2[(k, kp)] <= 1)
+                mod.addConstr(Y[(k, kp)] == A1[(k, kp)] + A2[(k, kp)])
 
-                m.addConstr(A3[(k, kp)] + A4[(k, kp)] <= 1)
-                m.addConstr(Z[(k, kp)] == A1[(k, kp)] + A2[(k, kp)])
-                m.addConstr(O[k] - O[kp] >= -inf * A3[(k, kp)] + A4[(k, kp)])
-                m.addConstr(O[k] - O[kp] <= -A3[(k, kp)] + inf * A4[(k, kp)])
+                mod.addConstr(A3[(k, kp)] + A4[(k, kp)] <= 1)
+                mod.addConstr(Z[(k, kp)] == A1[(k, kp)] + A2[(k, kp)])
+                mod.addConstr(O[k] - O[kp] >= -inf * A3[(k, kp)] + A4[(k, kp)])
+                mod.addConstr(O[k] - O[kp] <= -A3[(k, kp)] + inf * A4[(k, kp)])
 
 ##Linexpr constraints
 
@@ -316,10 +316,10 @@ for j in job_names:
         machine = LinExpr()
         lambd = LinExpr()
         for m in m_tasks[k]:
-            machine += Lambda_m[k, m] * m
-            lambd += Lambda_m[k, m]
-        m.addConstr(M[k] == machine)
-        m.addConstr(lambd == 1)
+            machine += Lambda_m[(k, m)] * m
+            lambd += Lambda_m[(k, m)]
+        mod.addConstr(M[k] == machine)
+        mod.addConstr(lambd == 1)
 
 for j in job_names:
     for k in tasks_per_job[j]:
@@ -327,16 +327,22 @@ for j in job_names:
         lambd = LinExpr()
         for m in m_tasks[k]:
             for op in op_task_machine[k][m]:
-                operateur += Lambda_o[k, m] * op
-                lambd += Lambda_o[k, m]
-        m.addConstr(O[k] == operateur)
-        m.addConstr(lambd == 1)
+                operateur += Lambda_o[(k, m, op)] * op
+                lambd += Lambda_o[(k, m, op)]
+        mod.addConstr(O[k] == operateur)
+        mod.addConstr(lambd == 1)
 
+
+# Cost function
+cost = LinExpr()
+for j in job_names:
+    cost += w[j] * (B[tasks_per_job[j][-1]] + p_tasks[tasks_per_job[j][-1]] + alpha*U[j] + beta*T[j])
+mod.setObjective(cost, GRB.MINIMIZE)
 
 # Optimize model
-m.optimize()
+mod.optimize()
 
-for v in m.getVars():
+for v in mod.getVars():
     print("%s %g" % (v.VarName, v.X))
 
-print("Obj: %g" % m.ObjVal)
+print("Obj: %g" % mod.ObjVal)
