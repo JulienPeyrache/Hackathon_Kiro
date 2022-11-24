@@ -154,9 +154,17 @@ for i in tasks_per_job:
         ]  ##Dictionnaire des processing time par tâche
         m_tasks[j] = [json["tasks"][j][
             "machines"][k]["machine"] for k in range(len(json["tasks"][j]["machines"]))
-        ]  ##Dictionnaire des machine par id de tâche
-        op_tasks[j] = {}
-         ##Dictionnaire des opérateurs par id de tâche et de machine
+        ]  ##Dictionnaire des machines par tâche
+op_task_machine = {}  ##Dictio des opérateurs par tâche et par machine (clé = nom de la tâche puis de la machine)
+for i in job_names:
+    for j in tasks_per_job[i]:
+        op_task_machine[j]={}
+        for k in json["tasks"]["machines"]:
+            op_task_machine[j][k["machine"]] = k["operators"]
+              ##Dictionnaire des opérateurs par tâche et par machine
+
+
+
 
 
 
