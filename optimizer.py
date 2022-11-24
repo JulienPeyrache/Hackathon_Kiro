@@ -159,6 +159,8 @@ for i in tasks_per_job:
             "operator"
         ]  ##Dictionnaire des opérateurs par id de tâche
 
+op
+
 ### Decision variables
 # beginning of tasks of jobs
 B = {
