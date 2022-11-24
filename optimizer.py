@@ -191,7 +191,31 @@ O = {
 }
 
 # One Task indicator
-Y = {}
+X = {
+    (j, k): m.addVar(vtype=GRB.BINARY, name=f"x_{j}_{k}")
+    for j in range(n_jobs)
+    for k in (tasks_per_job[j])
+}  ##X indique si en dessous ou au dessus de l'intervalle de temps
+
+Y = {
+    (j, k): m.addVar(vtype=GRB.BINARY, name=f"y_{j}_{k}")
+    for j in range(n_jobs)
+    for k in (tasks_per_job[j])
+}  ##Y indique si la tâche est réalisée ou non par la même machine
+
+Z = {
+    (j, k): m.addVar(vtype=GRB.BINARY, name=f"z_{j}_{k}")
+    for j in range(n_jobs)
+    for k in (tasks_per_job[j])
+}  ##Z indique si la tâche est réalisée ou non par le même opérateur
+
+# Vars A1, A2, A3, A4
+
+A1 = m.addVar(vtype=GRB.BINARY, name=f"A1")
+A2 = m.addVar(vtype=GRB.BINARY, name=f"A2")
+A3 = m.addVar(vtype=GRB.BINARY, name=f"A3")
+A4 = m.addVar(vtype=GRB.BINARY, name=f"A4")
+
 
 ### Constraints
 for j in range(1, n_jobs):
