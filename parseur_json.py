@@ -106,7 +106,7 @@ def main():
         data = f.read()
     res = value_parser(data.strip())
     try:
-        pprint.pprint(res[0])
+        pprint.pprint(res[0]["parameters"]["size"]["nb_tasks"])
     except TypeError:
         print(None)
 

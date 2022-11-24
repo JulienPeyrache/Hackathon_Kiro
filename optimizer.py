@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from gurobipy import *
 
 m = Model("trs0")
@@ -29,3 +30,14 @@ o = {(j,k) : m.addVar(vtype = GRB.INTEGER, name = f'o_{j}_{k}') for j in range(n
 
 # One Task indicator
 y = {(j,k,jp,kp) : m.addVar(vtype = GRB.BINARY, name = f'o_{j}_{k}_{jp}_{kp}') for j in range(n_jobs) for k in range(n_tasks_per_job[j]) for jp in range(n_jobs) for kp in range(n_tasks_per_job[jp])}
+=======
+import gurobipy as gp 
+from gurobipy import GRB
+
+try:
+    #Create a new model
+    m = gp.Model("mip1")
+
+    #Create variables
+    x = m.addVar(vtype=GRB.INTEGER, name="x")
+>>>>>>> 1bb963c (optimizer julien)
