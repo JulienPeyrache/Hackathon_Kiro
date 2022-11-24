@@ -110,7 +110,7 @@ def parser(filename):
     except TypeError:
         print(None)
 
-f="sujet/medium.json"
+f="sujet/huge.json"
 json_data = parser(f)
 
 mod = Model("trs0")
