@@ -119,7 +119,8 @@ m = Model("trs0")
 # Très grand nombre
 inf = 1000000000
 
-
+beta = json["parameters"]["costs"]["tardiness"]
+alpha = json["parameters"]["costs"]["unit_penalty"]
 n_machines = json["parameters"]["size"]["nb_machines"]  ##Nombre de machines
 n_operators = json["parameters"]["size"]["nb_operators"]  ##Nombre d'opérateurs
 n_jobs = json["parameters"]["size"]["nb_jobs"]  ##Nombre de jobs
@@ -159,7 +160,7 @@ for i in tasks_per_job:
         ]
         op_task_machine[j] = {}
         for k in json["tasks"][j - 1]["machines"]:
-            op_task_machine[j - 1][k["machine"]] = k["operators"]
+            op_task_machine[j][k["machine"]] = k["operators"]
 ### Decision variables
 
 # beginning of tasks of jobs
