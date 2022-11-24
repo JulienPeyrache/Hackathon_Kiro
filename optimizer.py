@@ -121,8 +121,8 @@ B = {(j,k) : m.addVar(vtype = GRB.INTEGER, name = f'b_{j}_{k}') for j in range(n
 # c = {(j,k) : m.addVar(vtype = GRB.INTEGER, name = f'c_{j}_{k}') for j in range(n_jobs) for k in range(n_tasks_per_job[j])}
 
 # tardiness of jobs
-T = {j : m.addVar(vtype = GRB.INTEGER, name = f't_{j}_{k}') for j in range(n_jobs) for k in range(n_tasks_per_job[j])}
-U = {(j,k) : m.addVar(vtype = GRB.BINARY, name = f'u_{j}_{k}') for j in range(n_jobs) for k in range(n_tasks_per_job[j])}
+T = {j : m.addVar(vtype = GRB.INTEGER, name = f't_{j}') for j in range(n_jobs)}
+U = {j : m.addVar(vtype = GRB.BINARY, name = f'u_{j}') for j in range(n_jobs)}
 
 # Task-machine assignment
 M = {(j,k) : m.addVar(vtype = GRB.INTEGER, name = f'm_{j}_{k}') for j in range(n_jobs) for k in range(n_tasks_per_job[j])}
@@ -136,8 +136,14 @@ Y = {(j,k,jp,kp) : m.addVar(vtype = GRB.BINARY, name = f'o_{j}_{k}_{jp}_{kp}') f
 
 for j in range(1,n_jobs):
   for k in  range(2,n_tasks_per_job[j]+1):
-    m.addConstr(B[(j,k)] >= B[(j,k-1)]+p[(k,j)])
+    m.addConstr(B[(j,k)] >= B[(j,k-1)]+p[(j,k)])
 
 for j in range(1,n_jobs+1):
-  m.addConstr(B[(j,2)] >= r[j])
+  m.addConstr(B[(j,1)] >= r[j])
+
+for j in range(1,n_jobs+1):
+  m.addConstr(T[j] >= 0)
+  m.addConstr(T[j] >= B[(j,n_tasks_per_job[j])] + p[(j,n_tasks_per_job[j])] - d[j])
+  m.addConstr(T[j] <= B[(j,n_tasks_per_job[j])] + p[(j,n_tasks_per_job[j])] - d[j] + M*(1-U[j]))
+  m.addConstr(T[j] <= M*U[j])
 
