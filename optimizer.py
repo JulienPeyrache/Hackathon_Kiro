@@ -147,16 +147,17 @@ for i in range(n_jobs):
 p_tasks = {}  ##Dictio des durées des tâches (clé = nom de la tâche)
 op_tasks = {}  ##Dictio des opérateurs des tâches (clé = nom de la tâche)
 m_tasks = {}  ##Dictio des machines des tâches (clé = nom de la tâche)
-op_task_machine = {}  ##Dictio des opérateurs par tâche et par machine (clé = nom de la tâche puis de la machine)
+op_task_machine = (
+    {}
+)  ##Dictio des opérateurs par tâche et par machine (clé = nom de la tâche puis de la machine)
 for i in tasks_per_job:
     for j in tasks_per_job[i]:
-        p_tasks[j] = json["tasks"][j][
-            "processing_time"
+        p_tasks[j] = json["tasks"][j]["processing_time"]
+        m_tasks[j] = [
+            json["tasks"][j]["machines"][k]["machine"]
+            for k in range(len(json["tasks"][j]["machines"]))
         ]
-        m_tasks[j] = [json["tasks"][j][
-            "machines"][k]["machine"] for k in range(len(json["tasks"][j]["machines"]))
-        ]  
-        op_task_machine[j]={}
+        op_task_machine[j] = {}
         for k in json["tasks"]["machines"]:
             op_task_machine[j][k["machine"]] = k["operators"]
 ### Decision variables
@@ -243,17 +244,24 @@ A4 = {
     for kp in tasks_per_job[jp]
 }
 
+
 ### Constraints
 for j in job_names:
-    for i in range(1,len(tasks_per_job[j])):
-        m.addConstr(B[tasks_per_job[j][i]] >= B[tasks_per_job[j][i-1]] + p_tasks[tasks_per_job[j][i]])
+    for i in range(1, len(tasks_per_job[j])):
+        m.addConstr(
+            B[tasks_per_job[j][i]]
+            >= B[tasks_per_job[j][i - 1]] + p_tasks[tasks_per_job[j][i]]
+        )
+
 
 for j in job_names:
     m.addConstr(B[tasks_per_job[j][0]] >= r[j])
 
 for j in job_names:
     m.addConstr(T[j] >= 0)
-    m.addConstr(T[j] >= B[(j, tasks_per_job[j][-1])] + p_tasks[tasks_per_job[j][-1]] - d[j])
+    m.addConstr(
+        T[j] >= B[(j, tasks_per_job[j][-1])] + p_tasks[tasks_per_job[j][-1]] - d[j]
+    )
     m.addConstr(
         T[j]
         <= B[(j, tasks_per_job[j][-1])]
@@ -267,23 +275,26 @@ for j in job_names:
     for k in tasks_per_job[j]:
         for jp in job_names:
             for kp in tasks_per_job[jp]:
-                m.addConstr(B[kp] <= B[k] - 1 + inf*X[(k, kp)] + inf*Y[(k, kp)])
-                m.addConstr(B[kp] >= B[k] + p_tasks[k] + inf*(1-X[(k, kp)]) + inf*Y[(k, kp)])
-                m.addConstr(B[kp] <= B[k] - 1 + inf*X[(k, kp)] + inf*Z[(k, kp)])
-                m.addConstr(B[kp] >= B[k] + p_tasks[k] + inf*(1-X[(k, kp)]) + inf*Z[(k, kp)])
+                m.addConstr(B[kp] <= B[k] - 1 + inf * X[(k, kp)] + inf * Y[(k, kp)])
+                m.addConstr(
+                    B[kp]
+                    >= B[k] + p_tasks[k] + inf * (1 - X[(k, kp)]) + inf * Y[(k, kp)]
+                )
+                m.addConstr(B[kp] <= B[k] - 1 + inf * X[(k, kp)] + inf * Z[(k, kp)])
+                m.addConstr(
+                    B[kp]
+                    >= B[k] + p_tasks[k] + inf * (1 - X[(k, kp)]) + inf * Z[(k, kp)]
+                )
 
-                m.addConstr(M[k] - M[jp,kp] >= -inf*A1[(k, kp)] + A2[(k, kp)])
-                m.addConstr(M[k] - M[jp,kp] <= -A1[(k, kp)] + inf*A2[(k, kp)])
+                m.addConstr(M[k] - M[jp, kp] >= -inf * A1[(k, kp)] + A2[(k, kp)])
+                m.addConstr(M[k] - M[jp, kp] <= -A1[(k, kp)] + inf * A2[(k, kp)])
                 m.addConstr(A1[(k, kp)] + A2[(k, kp)] <= 1)
                 m.addConstr(Y[(k, kp)] == A1[(k, kp)] + A2[(k, kp)])
-                
+
                 m.addConstr(A3[(k, kp)] + A4[(k, kp)] <= 1)
                 m.addConstr(Z[(k, kp)] == A1[(k, kp)] + A2[(k, kp)])
-                m.addConstr(O[k] - O[kp] >= -inf*A3[(k, kp)] + A4[(k, kp)])
-                m.addConstr(O[k] - O[kp] <= -A3[(k, kp)] + inf*A4[(k, kp)])
-
-
-
+                m.addConstr(O[k] - O[kp] >= -inf * A3[(k, kp)] + A4[(k, kp)])
+                m.addConstr(O[k] - O[kp] <= -A3[(k, kp)] + inf * A4[(k, kp)])
 
 
 # Optimize model
