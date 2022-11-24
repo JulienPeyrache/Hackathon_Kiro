@@ -165,7 +165,7 @@ for i in tasks_per_job:
 # beginning of tasks of jobs
 B = {
     (j, k): m.addVar(vtype=GRB.INTEGER, name=f"b_{j}_{k}")
-    for j in range(n_jobs)
+    for j in job_names
     for k in range(tasks_per_job[j])
 }
 
@@ -173,48 +173,72 @@ B = {
 # c = {(j,k) : m.addVar(vtype = GRB.INTEGER, name = f'c_{j}_{k}') for j in range(n_jobs) for k in range(n_tasks_per_job[j])}
 
 # tardiness of jobs
-T = {j: m.addVar(vtype=GRB.INTEGER, name=f"t_{j}") for j in range(n_jobs)}
-U = {j: m.addVar(vtype=GRB.BINARY, name=f"u_{j}") for j in range(n_jobs)}
+T = {j: m.addVar(vtype=GRB.INTEGER, name=f"t_{j}") for j in job_names}
+U = {j: m.addVar(vtype=GRB.BINARY, name=f"u_{j}") for j in job_names}
 
 # Task-machine assignment
 M = {
     (j, k): m.addVar(vtype=GRB.INTEGER, name=f"m_{j}_{k}")
-    for j in range(n_jobs)
+    for j in job_names
     for k in (tasks_per_job[j])
 }
 
 # Task-operator assignment
 O = {
     (j, k): m.addVar(vtype=GRB.INTEGER, name=f"o_{j}_{k}")
-    for j in range(n_jobs)
+    for j in job_names
     for k in (tasks_per_job[j])
 }
 
 # One Task indicator
 X = {
-    (j, k): m.addVar(vtype=GRB.BINARY, name=f"x_{j}_{k}")
-    for j in range(n_jobs)
+    (j, k, jp, kp): m.addVar(vtype=GRB.BINARY, name=f"x_{j}_{k}")
+    for j in job_names
     for k in (tasks_per_job[j])
+    for jp in job_names
+    for kp in (tasks_per_job[jp])
 }  ##X indique si en dessous ou au dessus de l'intervalle de temps
 
 Y = {
-    (j, k): m.addVar(vtype=GRB.BINARY, name=f"y_{j}_{k}")
-    for j in range(n_jobs)
+    (j, k, jp, kp): m.addVar(vtype=GRB.BINARY, name=f"y_{j}_{k}")
+    for j in job_names
     for k in (tasks_per_job[j])
+    for jp in job_names
+    for kp in (tasks_per_job[jp])
 }  ##Y indique si la tâche est réalisée ou non par la même machine
 
 Z = {
-    (j, k): m.addVar(vtype=GRB.BINARY, name=f"z_{j}_{k}")
-    for j in range(n_jobs)
+    (j, k, jp, kp): m.addVar(vtype=GRB.BINARY, name=f"z_{j}_{k}")
+    for j in job_names
     for k in (tasks_per_job[j])
+    for jp in job_names
+    for kp in (tasks_per_job[jp])
 }  ##Z indique si la tâche est réalisée ou non par le même opérateur
 
 # Vars A1, A2, A3, A4
+A1 = {
+    (j, k, jp, kp): m.addVar(vtype=GRB.BINARY, name=f"a1_{j}_{k}")
+    for j in job_names
+    for k in (tasks_per_job[j])
+    for jp in job_names
+    for kp in (tasks_per_job[jp])
+}
 
-A1 = m.addVar(vtype=GRB.BINARY, name=f"A1")
-A2 = m.addVar(vtype=GRB.BINARY, name=f"A2")
-A3 = m.addVar(vtype=GRB.BINARY, name=f"A3")
-A4 = m.addVar(vtype=GRB.BINARY, name=f"A4")
+A2 = {
+    (j, k, jp, kp): m.addVar(vtype=GRB.BINARY, name=f"a2_{j}_{k}")
+    for j in job_names
+    for k in (tasks_per_job[j])
+    for jp in job_names
+    for kp in (tasks_per_job[jp])
+}
+
+A3 = {
+    (j, k, jp, kp): m.addVar(vtype=GRB.BINARY, name=f"a3_{j}_{k}")
+    for j in job_names
+    for k in (tasks_per_job[j])
+    for jp in job_names
+    for kp in (tasks_per_job[jp])
+}
 
 
 ### Constraints
