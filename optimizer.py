@@ -117,7 +117,7 @@ from gurobipy import Model
 m = Model("trs0")
 
 # Très grand nombre
-M = 1000000000
+inf = 1000000000
 
 
 n_machines = json["parameters"]["size"]["nb_machines"]  ##Nombre de machines
@@ -240,7 +240,6 @@ for j in range(1, n_jobs + 1):
 for j in range(1, n_jobs):
     for k in range(1, tasks_per_job[j] + 1):
         m.addConstr(B[(j, k)] >= B[(j, k - 1)] + p_tasks[(j, k)])
-
 
 
 # Optimize model
